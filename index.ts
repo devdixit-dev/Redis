@@ -2,10 +2,10 @@ console.log("Hello via Bun!");
 
 import client from "./client";
 
-const init = async () => {
-  client.on('error', (err) => console.log(`Redis client error - ${err}`));
-
+const string = async () => {
   await client.connect();
+
+  client.on('error', (err) => console.log(`Redis client error - ${err}`));
 
   await client.set('key', 'value');
   const value = await client.get('key');
@@ -44,4 +44,29 @@ const init = async () => {
   console.log(await client.get('count'))
 }
 
-init();
+// string();
+
+const lists = async() => {
+  await client.connect();
+
+  await client.lPush('messages', 'hey');
+  await client.lPush('messages', 'hello');
+  // ['hello', 'hey']
+
+  await client.rPush('messages', 'right 2');
+  await client.rPush('messages', 'right 1');
+  // ['hello', 'hey', 'right 2', 'right 1']
+
+  await client.lPop('messages')
+  // ['hey', 'right 2', 'right 1']
+
+  await client.rPop('messages')
+  // ['hey', 'right 2']
+
+  const length = await client.lLen('messages')
+  console.log(length) // 2
+
+  console.log(await client.blPop('messages', 10))
+}
+
+lists();

@@ -46,3 +46,38 @@
 - await client.expire('key', 10)
   expire this key after 10s
   we can expire any key with the key name and second
+
+# Lists
+- we can use with stacks and queues both
+- one type of array
+
+1. lpush
+- await client.lPush('messages', 'hey')
+- it push hey into messages list from the left side
+- await client.lPush('messages', 'hello')
+- now the list look like this, ['hello', 'hey']
+
+2. rpush
+- await client.rPush('messages', 'right 2');
+- await client.rPush('messages', 'right 1');
+- it push both values in the messages list from right side
+now the list look like this, ['hello', 'hey', 'right 2', 'right 1']
+
+3. lpop
+- await client.lPop('messages')
+- it remove or return the values from left side
+
+4. rpop
+- await client.rPop('messages')
+- it remove or return the values from right side
+
+5. Blocking commands
+  1. blpop
+  - await client.blPop('messages', 10);
+    - pop messages list from the left side
+    - scenario 1: if message exist in 'messages' list then, return the message quickly
+    - scenario 2: else wait for the 10 seconds. if message arrived then same as above, else return null
+
+# Stack and Queues
+- Insert from the left side and Remove from the right side ~ Queue
+- Insert and Remove from the left side ~ Stack
