@@ -16,25 +16,33 @@
 5. Connect client
 - with await client.connect()
 
-6. SET
+# String
+
+1. SET
 - await client.set('key', 'value')
 - set key value pair in redis
 - (entity):(id) value - in example user:1 admin
 
-7. nx
+2. nx
 - await client.set('msg:1', 'hello', { NX: true })
   // Only set this key if it doesn't already exist
 - await client.set('msg:1', 'hello', { NX: false })
   // if key exist, then change the value of the key
 
-8. mget (multiple get)
+3. mget (multiple get)
 - await client.mGet(['name', 'msg:1']);
   pass multiple keys in one array to get the value
   if key doesn't include with value then, it shows null
 
-9. mset (multiple set)
+4. mset (multiple set)
 - await client.set({'user:3':'john doe', 'msg:3':'hello, john doe'})
   set multiple key value with objects
 
-10. incr
-- await client
+5. incr
+- await client.incr('count')
+  it increases key value by +1
+
+6. expire
+- await client.expire('key', 10)
+  expire this key after 10s
+  we can expire any key with the key name and second

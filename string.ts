@@ -1,9 +1,8 @@
 console.log("Hello via Bun!");
 
-import { createClient } from "redis";
+import client from "./client";
 
-const RedisClient = async () => {
-  const client = createClient();
+const init = async () => {
   client.on('error', (err) => console.log(`Redis client error - ${err}`));
 
   await client.connect();
@@ -40,6 +39,9 @@ const RedisClient = async () => {
   const incrCount = await client.incr('count') 
   // it increase count by +1
   console.log(incrCount) // 6
+
+  await client.expire('count', 10);
+  console.log(await client.get('count'))
 }
 
-RedisClient();
+init();
