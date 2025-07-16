@@ -81,3 +81,26 @@ now the list look like this, ['hello', 'hey', 'right 2', 'right 1']
 # Stack and Queues
 - Insert from the left side and Remove from the right side ~ Queue
 - Insert and Remove from the left side ~ Stack
+
+# Other data types
+- we have sets, hash maps, ordered sets, streams, geospatial data
+- and also pub-sub
+
+# Test
+- without redis - 1.51s
+- with redis (before cache) - 1.07s
+- with redis caching - 40ms/9ms/8ms
+
+# How this works
+
+Client --> Server --> Database (1st time)
+- client do the request for the data to the server and server getting the data from database.
+
+If we don't use redis then, the server follow the pattern everytime
+
+Client --> Server --> Database --> Redis(as a cache value)
+
+Client --> Server --> Redis(if values found)-(if not found, then call out the database) --> Database
+
+- Time efficiency increased by 70%/80%
+- Note: we have to do expire key after some amount of time (30s/60s)

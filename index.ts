@@ -1,72 +1,38 @@
-console.log("Hello via Bun!");
+import express from 'express';
+import axios from 'axios';
 
-import client from "./client";
+import client from './client';
 
-const string = async () => {
-  await client.connect();
+const app = express();
 
-  client.on('error', (err) => console.log(`Redis client error - ${err}`));
+app.get('/', async(req, res) => {
+  // wait for the client to connect - MISTAKE 1
+  await client.connect()
+  .then(() => { console.log(`Redis client connected`) })
+  .catch((e) => { console.log(`Error connecting redis client - ${e}`) });
 
-  await client.set('key', 'value');
-  const value = await client.get('key');
+  // error handling for redis client
+  client.on('error', (err) => console.log(`Redis Client Error - ${err}`));
 
-  console.log(value);
+  // check this cache values with .get
+  const cacheValue = await client.get('todos');
+  // if this value found then return the data
+  // parse the data from string to json
+  if(cacheValue) return res.json(JSON.parse(cacheValue))
 
-  await client.set('name', 'admin');
-  const name = await client.get('name');
-  console.log(name);
+  const {data} = await axios.get('https://jsonplaceholder.typicode.com/todos');
+  // if data not found in redis, then store first in redis using .set
+  // do JSON stringify data for the string operations
+  await client.set('todos', JSON.stringify(data));
+  // expire this todos key after 60sec/1min
+  await client.expire('todos', 60);
+  return res.json(data);
+});
 
-  await client.set('msg:1', 'hey');
-  const message = await client.get('msg:1');
-  console.log(message);
+app.listen(9000, () => {
+  console.log(`Server: 9000`)
+});
 
-  await client.set('msg:1', 'hello', { NX: true });
-  const newMsg = await client.get('msg:1');
-  console.log(newMsg);
-
-  const multipleValuesGet = await client.mGet(['name', 'msg:1']);
-  console.log(multipleValuesGet); // ["admin", "hey"]
-
-  const multipleValuesSet = await client.mSet(
-    {
-      'user:3': 'devdixit',
-      'msg:3': 'hello admin'
-    }
-  );
-  console.log(await client.mGet(['user:3', 'msg:3'])); 
-  // ["dev dixit", "hello admin"]
-
-  const incrCount = await client.incr('count') 
-  // it increase count by +1
-  console.log(incrCount) // 6
-
-  await client.expire('count', 10);
-  console.log(await client.get('count'))
-}
-
-// string();
-
-const lists = async() => {
-  await client.connect();
-
-  await client.lPush('messages', 'hey');
-  await client.lPush('messages', 'hello');
-  // ['hello', 'hey']
-
-  await client.rPush('messages', 'right 2');
-  await client.rPush('messages', 'right 1');
-  // ['hello', 'hey', 'right 2', 'right 1']
-
-  await client.lPop('messages')
-  // ['hey', 'right 2', 'right 1']
-
-  await client.rPop('messages')
-  // ['hey', 'right 2']
-
-  const length = await client.lLen('messages')
-  console.log(length) // 2
-
-  console.log(await client.blPop('messages', 10))
-}
-
-lists();
+// without redis - 1.51s
+// with redis (before cache) - 1.07s
+// with redis caching - 40ms/9ms/8ms
