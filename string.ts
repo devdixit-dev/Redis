@@ -1,6 +1,6 @@
 console.log("Hello via Bun!");
 
-import client from "./client";
+import client from "./server";
 
 const string = async () => {
   await client.connect();
