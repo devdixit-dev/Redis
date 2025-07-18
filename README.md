@@ -200,3 +200,33 @@ await client.persist('users');
 1. Session management
 2. Rate limiting
 3. Temporary tokens (OTP, Password reset)
+
+## 3. Redis Pub/Sub (Publisher/Subscribe)
+- Real-time notifications
+- Chat apps
+- Live dashboards
+- Background processing triggers
+
+#### Concept
+- 📦 Publisher sends a message to a channel
+- 📬 Subscribers receive that message instantly
+
+#### Publisher
+``` js
+await client.publish('chat-room', 'Hello, world!');
+```
+
+#### Subscriber
+``` js
+const subscriber = client.duplicate();
+// separate connection
+
+await subscriber.connect();
+
+await subscriber.subscribe('chat-room', (message) => {
+  // if chat-room received a message, then log this
+  console.log(`Received: ${message}`);
+});
+```
+
+- Note: Pub/Sub is fire-and-forget — no history, no message persistence. Use Redis Streams or Kafka for durability.
