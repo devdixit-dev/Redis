@@ -147,6 +147,23 @@ app.get('/todos', async (req, res) => {
 
 app.listen(3000, () => { console.log(`Server at 3000`) });
 ```
-#### Timings
 - Server - 499ms
 - Redis - 20ms
+
+#### Write-through cache
+- Write to cache and DB at a same time
+
+```js
+await redisClient.set('user:123', JSON.stringify(userData));
+// set data to redis first
+
+await db.updateUser(userData);
+// callout the database and store immidiatly after redis
+```
+
+#### Write-back cache
+- Write to cache first, sync with DB later (with a delay)
+- Use when need to do background job
+
+#### Cache aside (Lazy loading)
+- Checks cache first. if miss, loads from database and caches it.

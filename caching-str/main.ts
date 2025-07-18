@@ -29,5 +29,4 @@ const BasicCaching = async () => {
 
   app.listen(3000, () => { console.log(`Server at 3000`) });
 }
-
 BasicCaching();
