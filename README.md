@@ -104,3 +104,49 @@ Client --> Server --> Redis(if values found)-(if not found, then call out the da
 
 - Time efficiency increased by 70%/80%
 - Note: we have to do expire key after some amount of time (30s/60s)
+
+# Advance Topics
+1. Caching strategies
+2. TTL (Time To Live)
+3. Pub/Sub (Publish/Subscribe)
+
+## 1. Caching strategies
+- Reduce database load
+- Improve response time
+- Handle high traffic
+
+#### Read-through
+``` js
+import express from 'express';
+import client from "../server";
+
+const app = express();
+
+await client.connect()
+  .then(() => { console.log(`Redis connected`) })
+  .catch((e) => { console.log(`Error in redis connection - ${e}`) });
+
+app.get('/todos', async (req, res) => {
+
+  const cachedData = await client.get('todos');
+
+  if (cachedData) return res.json({
+    from: 'redis',
+    data: JSON.parse(cachedData)
+  });
+  const response = await fetch('https://jsonplaceholder.typicode.com/todos');
+  const data = await response.json();
+
+  await client.set('todos', JSON.stringify(data), { EX: 60 });
+
+  return res.json({
+    from: 'server',
+    data: data
+  })
+});
+
+app.listen(3000, () => { console.log(`Server at 3000`) });
+```
+#### Timings
+- Server - 499ms
+- Redis - 20ms
