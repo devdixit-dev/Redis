@@ -167,3 +167,36 @@ await db.updateUser(userData);
 
 #### Cache aside (Lazy loading)
 - Checks cache first. if miss, loads from database and caches it.
+
+## 2. TTL(Time To Leave)
+- TTL controls how long a key stays in redis. After TTL expires, the key is automatically deleted
+
+#### Set a key with TTL
+``` js
+await client.set('users', serverData, { EX: 60 });
+// expires in 60 seconds
+```
+
+#### Add TTL to existing key
+``` js
+await client.expire('users', 30);
+// it modifies ttl value from 60 to 30
+```
+
+#### Check TTL of a key
+``` js
+await client.ttl('users');
+// check ttl for existing key
+// add in var and log this
+```
+
+#### Persistent key (remove TTL)
+``` js
+await client.persist('users');
+// remove ttl from users key and make sure this key has no limit
+```
+
+- Use TTL for
+1. Session management
+2. Rate limiting
+3. Temporary tokens (OTP, Password reset)
